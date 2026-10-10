@@ -6,6 +6,8 @@
 
 Каталог → выбор букета → корзина → заказ → управление в админ-панели.
 
+[![Проверки и сборка](https://github.com/ECL1SSI/lepestok-flower-shop/actions/workflows/ci.yml/badge.svg)](https://github.com/ECL1SSI/lepestok-flower-shop/actions/workflows/ci.yml)
+
 ![React](https://img.shields.io/badge/React-19-294536?style=flat-square)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-294536?style=flat-square)
 ![Cloudflare](https://img.shields.io/badge/Cloudflare-Workers_+_D1-846f58?style=flat-square)
@@ -179,7 +181,7 @@ pnpm build
 
 ## Проверено
 
-**56 интеграционных проверок** прошли на настоящей SQLite, Web Crypto и реальных обработчиках API: аккаунты, роли, запрет чужих заказов, расчёт цены, промокоды, оформление, статусы, изменение и удаление товаров, сохранение после перезапуска, профиль, избранное и выход. TypeScript и переносимая сборка проверяются отдельно. Новые workflows запускаются только после размещения репозитория. Скриншоты ещё не подтверждают проверку поведения на реальном телефоне.
+**56 интеграционных проверок** прошли на настоящей SQLite, Web Crypto и реальных обработчиках API: аккаунты, роли, запрет чужих заказов, расчёт цены, промокоды, оформление, статусы, изменение и удаление товаров, сохранение после перезапуска, профиль, избранное и выход. TypeScript, 56 интеграционных проверок и переносимая сборка успешно выполнены в [GitHub Actions](https://github.com/ECL1SSI/lepestok-flower-shop/actions/runs/38031427113). [Создание семи скриншотов](https://github.com/ECL1SSI/lepestok-flower-shop/actions/runs/38031427162) также завершилось успешно. Скриншоты ещё не подтверждают проверку поведения на реальном телефоне.
 
 ## Перед реальными продажами
 
