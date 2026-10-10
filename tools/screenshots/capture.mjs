@@ -17,7 +17,7 @@ else {status=400;result={error:'Действие не используется �
 await route.fulfill({status,contentType:'application/json',body:JSON.stringify(result)});
 });
 return {context,page:await context.newPage()};}
-async function ready(page){await page.locator('.header').waitFor();await page.evaluate(()=>document.fonts.ready);await page.evaluate(async()=>{await Promise.all(Array.from(document.images).filter(i=>i.loading!=='lazy').map(i=>i.decode().catch(()=>{})))});}
+async function ready(page){await page.locator('.header').waitFor();await page.evaluate(()=>document.fonts.ready);await page.evaluate(async()=>{const images=Array.from(document.images);images.forEach(i=>i.loading='eager');await Promise.all(images.map(i=>i.decode()));await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)))});}
 async function shot(page,name,fullPage=false){await ready(page);await page.screenshot({path:path.join(output,name+'.png'),fullPage});console.log('Captured '+name);}
 try{
  const {context,page}=await create(1440,1000);await page.goto(url,{waitUntil:'domcontentloaded'});await shot(page,'home-desktop');
@@ -28,6 +28,6 @@ try{
  await page.locator('input[name=email]').fill('admin@flower.test');await page.locator('input[name=password]').fill('AdminDemo!2026');await page.getByRole('button',{name:'Войти',exact:true}).click();await page.locator('.metrics').waitFor();await shot(page,'admin');await context.close();
  const mobile=await create(390,844);await mobile.page.goto(url,{waitUntil:'domcontentloaded'});await shot(mobile.page,'home-mobile');await mobile.context.close();
  const images=[['Главная','home-desktop'],['Каталог','catalog'],['Карточка букета','product'],['Корзина','cart'],['Вход','login'],['Панель администратора','admin'],['На телефоне','home-mobile']];
- const readme=path.join(root,'README.md');let text=fs.readFileSync(readme,'utf8');const gallery=images.map(([title,file])=>`<details>\n<summary>${title}</summary>\n\n![${title}](docs/screenshots/${file}.png)\n\n</details>`).join('\n\n');
+ const readme=path.join(root,'README.md');let text=fs.readFileSync(readme,'utf8');const gallery=images.map(([title,file],index)=>`<details${index===0?' open':''}>\n<summary>${title}</summary>\n\n![${title}](docs/screenshots/${file}.png)\n\n</details>`).join('\n\n');
  text=text.replace(/<!-- SCREENSHOTS:START -->[\s\S]*?<!-- SCREENSHOTS:END -->/,'<!-- SCREENSHOTS:START -->\n'+gallery+'\n<!-- SCREENSHOTS:END -->');text=text.replace(/Сейчас включён сохранённый реальный скриншот[\s\S]*?Workflow ещё не запускался\./,'Галерея автоматически снята с настоящего интерфейса приложения. Для снимков используются фиксированные демонстрационные данные; реальные заказы и персональные данные клиентов не затрагиваются. Это визуальная документация, а не тест серверной авторизации.');fs.writeFileSync(readme,text);
 }finally{await browser.close()}
