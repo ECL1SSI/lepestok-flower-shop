@@ -24,7 +24,7 @@ try{
  await page.getByRole('button',{name:'Выбрать букет',exact:true}).first().click();await page.locator('.catalog').waitFor();await shot(page,'catalog');
  await page.getByRole('button',{name:'Подробнее о букете Тихое утро',exact:true}).click();await page.locator('.product-modal').waitFor();await shot(page,'product');
  await page.getByRole('button',{name:'Закрыть карточку',exact:true}).click();await page.getByRole('button',{name:'Добавить в корзину',exact:true}).first().click();await page.getByRole('button',{name:'Корзина',exact:true}).click();await page.locator('.cart-summary .total').waitFor();await shot(page,'cart');
- await page.getByRole('button',{name:'Личный кабинет',exact:true}).click();await page.locator('.auth-form').waitFor();await shot(page,'login');
+ await page.locator('.header').getByRole('button',{name:'Личный кабинет',exact:true}).click();await page.locator('.auth-form').waitFor();await shot(page,'login');
  await page.locator('input[name=email]').fill('admin@flower.test');await page.locator('input[name=password]').fill('AdminDemo!2026');await page.getByRole('button',{name:'Войти',exact:true}).click();await page.locator('.metrics').waitFor();await shot(page,'admin');await context.close();
  const mobile=await create(390,844);await mobile.page.goto(url,{waitUntil:'domcontentloaded'});await shot(mobile.page,'home-mobile');await mobile.context.close();
  const images=[['Главная','home-desktop'],['Каталог','catalog'],['Карточка букета','product'],['Корзина','cart'],['Вход','login'],['Панель администратора','admin'],['На телефоне','home-mobile']];
