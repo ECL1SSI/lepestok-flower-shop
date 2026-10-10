@@ -1,0 +1,65 @@
+import assert from 'node:assert/strict';
+import {DatabaseSync} from 'node:sqlite';
+import ts from 'typescript';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
+const dir=fs.mkdtempSync(path.join(os.tmpdir(),'flower-tests-'));
+for(const name of ['seed','server','catalog']){let code=fs.readFileSync('lib/'+name+'.ts','utf8').replace("from './seed'","from './seed.mjs'");fs.writeFileSync(path.join(dir,name+'.mjs'),ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText)}
+const {handle,resetSeed}=await import(path.join(dir,'server.mjs'));
+const sqlite=new DatabaseSync(path.join(dir,'test.sqlite'));for(const migration of fs.readdirSync('drizzle').filter(x=>x.endsWith('.sql')).sort())sqlite.exec(fs.readFileSync('drizzle/'+migration,'utf8'));
+class Statement{constructor(sql,args=[]){this.sql=sql;this.args=args}bind(...args){return new Statement(this.sql,args)}async first(){return sqlite.prepare(this.sql).get(...this.args)||null}async all(){return {results:sqlite.prepare(this.sql).all(...this.args)}}async run(){const r=sqlite.prepare(this.sql).run(...this.args);return {meta:{changes:Number(r.changes)}}}}
+const DB={prepare(sql){return new Statement(sql)},async batch(statements){sqlite.exec('BEGIN');try{const r=[];for(const s of statements)r.push(await s.run());sqlite.exec('COMMIT');return r}catch(e){sqlite.exec('ROLLBACK');throw e}}};
+const env={DB,DEMO_MODE:'true'},cookies={};let checks=0;
+async function request(endpoint,method='GET',data,actor='guest',customHeaders={}){const r=await handle(new Request('https://flower.test/api/'+endpoint,{method,headers:{'content-type':'application/json',...(cookies[actor]?{cookie:cookies[actor]}:{}),...customHeaders},body:data?JSON.stringify(data):undefined}),env);const v=await r.json();if(r.headers.get('set-cookie'))cookies[actor]=r.headers.get('set-cookie').split(';')[0];return {status:r.status,data:v};}
+function check(condition,label){assert.ok(condition,label);checks++;console.log('✓ '+label)}
+const {filterProducts}=await import(path.join(dir,'catalog.mjs'));const {products}=await import(path.join(dir,'seed.mjs'));
+check(filterProducts(products,{query:'ТИХОЕ',sort:'popular'})[0].id==='p1','Поиск по названию без учёта регистра');
+check(filterProducts(products,{query:'эустом',sort:'popular'}).length===4,'Поиск по составу');
+check(filterProducts(products,{maxPrice:110,sort:'asc'}).map(p=>p.id).join(',')==='p3','Бюджет использует цену выбранного стандартного размера');
+check(filterProducts(products,{occasion:'Свидание',flower:'Розы',shade:'Розовый',inStock:true,sort:'popular'}).map(p=>p.id).join(',')==='p2','Совместные фильтры по поводу, цветам, оттенку и наличию');
+check(filterProducts(products,{inStock:true,sort:'asc'}).length===5,'Фильтр наличия');
+check(filterProducts(products,{query:'несуществующий букет',sort:'popular'}).length===0,'Пустое состояние поиска');
+check(filterProducts(products,{sort:'asc'})[0].id==='p3'&&filterProducts(products,{sort:'desc'})[0].id==='p6','Сортировка по цене в обе стороны');
+let r=await request('store');check(r.status===200&&r.data.products.length===6,'Демонстрационная витрина и 6 букетов');check(sqlite.prepare('SELECT COUNT(*) n FROM users').get().n===2,'Изначально ровно два аккаунта');check(sqlite.prepare('SELECT hash FROM users LIMIT 1').get().hash.length===64,'Пароли хешированы');
+r=await request('auth/login','POST',{email:'user@flower.test',password:'bad'},'user');check(r.status===401,'Неверный пароль отклонён');
+r=await request('auth/login','POST',{email:'user@flower.test',password:'UserDemo!2026'},'user');check(r.status===200&&r.data.user.role==='customer','Вход покупателя');check(!('hash' in r.data.user),'Хеш пароля не раскрывается');
+r=await request('auth/login','POST',{email:'admin@flower.test',password:'AdminDemo!2026'},'admin');check(r.status===200&&r.data.user.role==='admin','Вход администратора');
+for(const [endpoint,method,data] of [['admin/data','GET'],['admin/products','POST',{}],['admin/settings','POST',{}],['admin/coupons','POST',{}],['admin/orders/DEMO-1001','PATCH',{status:'Отменён'}],['admin/products/p1','DELETE'],['admin/upload','POST',{}]]){r=await request(endpoint,method,data,'user');check(r.status===403,'Покупателю запрещён '+endpoint+' '+method)}
+r=await request('admin/data');check(r.status===401,'Гостю запрещён административный API');
+r=await request('orders','GET',undefined,'user');check(r.data.length===3&&r.data.every(o=>o.userId==='demo-user'),'История покупателя содержит только его заказы');
+const item={productId:'p1',size:'S',packaging:'Крафт',qty:2,addons:['card'],price:1};
+r=await request('quote','POST',{items:[item],method:'pickup'},'user');check(r.data.total===200,'Цена размера S и дополнений рассчитана на сервере, подмена цены игнорируется');
+r=await request('quote','POST',{items:[{...item,size:'L'}],method:'delivery'},'user');check(r.data.total===392,'Цена размера L и доставки пересчитана');
+r=await request('quote','POST',{items:[item],code:'WELCOME10',method:'delivery'},'user');check(r.data.discount===20&&r.data.total===192,'Промокод и полная сумма');
+r=await request('quote','POST',{items:[item],code:'WRONG',method:'pickup'},'user');check(r.status===400,'Невалидный промокод отклонён');
+r=await request('quote','POST',{items:[{...item,qty:-1}],method:'pickup'},'user');check(r.status===400,'Количество валидируется на сервере');
+r=await request('orders','POST',{items:[item]},'user');check(r.status===400,'Обязательные поля заказа проверяются на сервере');
+const order={items:[item],code:'WELCOME10',method:'delivery',name:'Анна',phone:'+375 29 1234567',recipient:'Мария',recipientPhone:'+375 29 7654321',zone:'Минск',address:'Демо, дом 1',date:new Date(Date.now()+86400000).toISOString().slice(0,10),interval:'13:00–16:00',consent:true,card:'С любовью',anonymous:true};
+r=await request('orders','POST',order,'user');check(r.status===201&&r.data.total===192&&r.data.payment==='Не оплачен','Заказ создан без имитации успешной оплаты');const oid=r.data.id;
+r=await request('admin/data','GET',undefined,'admin');check(r.data.orders.some(o=>o.id===oid),'Заказ появляется в админ-панели');
+r=await request('admin/orders/'+oid,'PATCH',{status:'Собирается',payment:'Оплачен (демо)'},'admin');check(r.status===200,'Администратор обновляет статусы');
+r=await request('orders/'+oid,'GET',undefined,'user');check(r.data.status==='Собирается'&&r.data.payment==='Оплачен (демо)','Изменённый статус виден покупателю');
+r=await request('orders','POST',order,'user');check(r.status===400,'Лимит промокода на покупателя действует');
+r=await request('orders','POST',{...order,code:''});check(r.status===201&&r.data.userId===null,'Гостевая покупка без регистрации');const guestId=r.data.id;
+r=await request('orders/'+guestId,'GET',undefined,'user');check(r.status===404,'Чужие и гостевые заказы недоступны покупателю');
+r=await request('auth/register','POST',{name:'Проверка',email:'another@flower.test',password:'AnotherStrong!2026',role:'admin'},'another');check(r.status===200&&r.data.user.role==='customer','Регистрация игнорирует самостоятельно назначенную роль admin');
+r=await request('orders/'+oid,'GET',undefined,'another');check(r.status===404,'Другой покупатель не получает чужой заказ');
+r=await request('profile','PATCH',{name:'Новое имя',phone:'+375 29 1234567',addresses:['Минск, тест'],role:'admin'},'user');check(r.data.role==='customer'&&r.data.name==='Новое имя','Профиль сохраняется без повышения роли');
+r=await request('favorites','POST',{id:'p2'},'user');check(r.data.favorites.includes('p2'),'Избранное сохраняется на сервере');
+let p=(await request('store')).data.products[0];p={...p,name:'Новый букет',id:undefined};r=await request('admin/products','POST',p,'admin');check(r.status===200,'Администратор создаёт товар');const pid=r.data.id;
+r=await request('store');check(r.data.products.some(p=>p.id===pid),'Новый товар появляется на витрине');
+r=await request('admin/products','POST',{...p,id:pid,name:'Изменённый букет',sizes:[{name:'M',price:222,composition:'21 роза'}]},'admin');check(r.status===200,'Редактирование цены и состава');
+r=await request('store');check(r.data.products.find(p=>p.id===pid).sizes[0].price===222,'Витрина показывает обновлённую цену');
+r=await request('admin/products','POST',{...p,id:'settings'},'admin');check(r.status===400,'Товаром нельзя перезаписать системную запись');
+r=await request('admin/orders/settings','PATCH',{status:'Новый',payment:'Не оплачен'},'admin');check(r.status===404,'Заказом нельзя перезаписать настройки');
+r=await request('admin/products/p1','DELETE',undefined,'admin');check(r.status===200,'Удаление товара');r=await request('orders/'+oid,'GET',undefined,'user');check(r.data.items[0].name==='Тихое утро'&&r.data.items[0].price===95,'Снимок товара и цены в старом заказе сохраняется');
+resetSeed();r=await request('store');check(!r.data.products.some(p=>p.id==='p1')&&r.data.products.some(p=>p.id===pid),'После перезапуска сохраняются изменения и удалённые товары не воскресают');
+let st=r.data.settings;r=await request('admin/settings','POST',{...st,name:'Тестовый бутик',delivery:19},'admin');check(r.status===200,'Настройки сохраняются');r=await request('store');check(r.data.settings.name==='Тестовый бутик'&&r.data.settings.delivery===19,'Настройки отражаются в магазине');
+r=await request('admin/coupons','POST',{code:'TEST20',percent:20,min:50,expires:'2027-12-31',limit:2,perUser:0,active:true},'admin');check(r.status===200,'Создание промокода');
+r=await request('admin/settings','POST',st,'admin',{'origin':'https://attacker.test'});check(r.status===403,'Межсайтовая запись запрещена');
+await request('auth/logout','POST',undefined,'user');r=await request('profile','GET',undefined,'user');check(r.status===401,'Выход покупателя аннулирует сессию');
+await request('auth/logout','POST',undefined,'admin');r=await request('admin/data','GET',undefined,'admin');check(r.status===401,'Выход администратора аннулирует сессию');
+env.DEMO_MODE='false';r=await request('auth/login','POST',{email:'admin@flower.test',password:'AdminDemo!2026'},'admin');check(r.status===401,'Демо-аккаунты отключаются в рабочей среде');
+console.log('\n'+checks+' проверок успешно. Реальная SQLite, Web Crypto и обработчики API.');
+sqlite.close();fs.rmSync(dir,{recursive:true});

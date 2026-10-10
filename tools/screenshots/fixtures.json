@@ -1,0 +1,459 @@
+{
+  "products": [
+    {
+      "id": "p1",
+      "name": "Тихое утро",
+      "category": "Авторские букеты",
+      "flower": "Розы",
+      "shade": "Пудровый",
+      "occasion": [
+        "День рождения",
+        "Благодарность",
+        "Просто так"
+      ],
+      "image": "/images/hero.jpg",
+      "gallery": [
+        "/images/hero.jpg",
+        "/images/rose-v2.webp"
+      ],
+      "description": "Нежные оттенки, садовая зелень и чуть больше воздуха. Для самых тёплых слов.",
+      "sizes": [
+        {
+          "name": "S",
+          "price": 95,
+          "composition": "7 роз, 3 эустомы, эвкалипт"
+        },
+        {
+          "name": "M",
+          "price": 135,
+          "composition": "11 роз, 5 эустом, эвкалипт"
+        },
+        {
+          "name": "L",
+          "price": 185,
+          "composition": "17 роз, 7 эустом, эвкалипт"
+        }
+      ],
+      "packaging": [
+        "Матовая бумага",
+        "Крафт",
+        "Без упаковки"
+      ],
+      "available": true,
+      "visible": true,
+      "popularity": 99,
+      "demo": true
+    },
+    {
+      "id": "p2",
+      "name": "Розовый шёпот",
+      "category": "Монобукеты",
+      "flower": "Розы",
+      "shade": "Розовый",
+      "occasion": [
+        "Свидание",
+        "Годовщина"
+      ],
+      "image": "/images/rose-v2.webp",
+      "gallery": [
+        "/images/rose-v2.webp"
+      ],
+      "description": "Классика в современном прочтении. Розовые розы и лаконичная упаковка.",
+      "sizes": [
+        {
+          "name": "S",
+          "price": 85,
+          "composition": "9 роз"
+        },
+        {
+          "name": "M",
+          "price": 125,
+          "composition": "15 роз"
+        },
+        {
+          "name": "L",
+          "price": 195,
+          "composition": "25 роз"
+        }
+      ],
+      "packaging": [
+        "Матовая бумага",
+        "Крафт"
+      ],
+      "available": true,
+      "visible": true,
+      "popularity": 95,
+      "demo": true
+    },
+    {
+      "id": "p3",
+      "name": "Солнечный день",
+      "category": "Авторские букеты",
+      "flower": "Тюльпаны",
+      "shade": "Яркий",
+      "occasion": [
+        "День рождения",
+        "Просто так"
+      ],
+      "image": "/images/tulip-v2.jpg",
+      "gallery": [
+        "/images/tulip-v2.jpg"
+      ],
+      "description": "Маленькое солнце для большого повода. Сезонный букет с тюльпанами.",
+      "sizes": [
+        {
+          "name": "S",
+          "price": 75,
+          "composition": "11 тюльпанов"
+        },
+        {
+          "name": "M",
+          "price": 105,
+          "composition": "19 тюльпанов"
+        },
+        {
+          "name": "L",
+          "price": 155,
+          "composition": "29 тюльпанов"
+        }
+      ],
+      "packaging": [
+        "Крафт",
+        "Матовая бумага"
+      ],
+      "available": true,
+      "visible": true,
+      "popularity": 90,
+      "demo": true
+    },
+    {
+      "id": "p4",
+      "name": "Белая история",
+      "category": "Авторские букеты",
+      "flower": "Эустомы",
+      "shade": "Белый",
+      "occasion": [
+        "Годовщина",
+        "Благодарность"
+      ],
+      "image": "/images/white-v2.webp",
+      "gallery": [
+        "/images/white-v2.webp"
+      ],
+      "description": "Светлый, спокойный и элегантный. Когда красота живёт в простоте.",
+      "sizes": [
+        {
+          "name": "S",
+          "price": 110,
+          "composition": "5 эустом, 5 роз, зелень"
+        },
+        {
+          "name": "M",
+          "price": 165,
+          "composition": "9 эустом, 9 роз, зелень"
+        },
+        {
+          "name": "L",
+          "price": 225,
+          "composition": "13 эустом, 15 роз, зелень"
+        }
+      ],
+      "packaging": [
+        "Матовая бумага",
+        "Без упаковки"
+      ],
+      "available": true,
+      "visible": true,
+      "popularity": 88,
+      "demo": true
+    },
+    {
+      "id": "p5",
+      "name": "Садовое настроение",
+      "category": "Авторские букеты",
+      "flower": "Розы",
+      "shade": "Пудровый",
+      "occasion": [
+        "День рождения",
+        "Свидание"
+      ],
+      "image": "/images/garden-v2.webp",
+      "gallery": [
+        "/images/garden-v2.webp"
+      ],
+      "description": "Свободная композиция в природной палитре, вдохновлённая цветущим садом.",
+      "sizes": [
+        {
+          "name": "S",
+          "price": 140,
+          "composition": "9 садовых роз, 5 эустом, эвкалипт"
+        },
+        {
+          "name": "M",
+          "price": 195,
+          "composition": "15 садовых роз, 7 эустом, эвкалипт"
+        },
+        {
+          "name": "L",
+          "price": 265,
+          "composition": "21 садовая роза, 11 эустом, эвкалипт"
+        }
+      ],
+      "packaging": [
+        "Матовая бумага",
+        "Крафт"
+      ],
+      "available": true,
+      "visible": true,
+      "popularity": 85,
+      "demo": true
+    },
+    {
+      "id": "p6",
+      "name": "Особенный момент",
+      "category": "Цветы в коробке",
+      "flower": "Розы",
+      "shade": "Розовый",
+      "occasion": [
+        "Годовщина",
+        "День рождения"
+      ],
+      "image": "/images/box-v2.webp",
+      "gallery": [
+        "/images/box-v2.webp"
+      ],
+      "description": "Нежная композиция в коробке. Заметный жест для особенного человека.",
+      "sizes": [
+        {
+          "name": "S",
+          "price": 150,
+          "composition": "11 роз, 3 эустомы, коробка"
+        },
+        {
+          "name": "M",
+          "price": 210,
+          "composition": "19 роз, 5 эустом, коробка"
+        },
+        {
+          "name": "L",
+          "price": 290,
+          "composition": "29 роз, 7 эустом, коробка"
+        }
+      ],
+      "packaging": [
+        "Коробка"
+      ],
+      "available": false,
+      "visible": true,
+      "popularity": 80,
+      "demo": true
+    }
+  ],
+  "settings": {
+    "name": "Лепесток",
+    "city": "Минск",
+    "currency": "BYN",
+    "phone": "",
+    "email": "",
+    "hours": "Часы работы уточняются",
+    "social": "",
+    "pickup": "Адрес самовывоза уточняется",
+    "delivery": 12,
+    "zones": [
+      "Минск"
+    ],
+    "intervals": [
+      "10:00–13:00",
+      "13:00–16:00",
+      "16:00–19:00"
+    ],
+    "budgets": [
+      100,
+      150,
+      200
+    ],
+    "categories": [
+      "Авторские букеты",
+      "Монобукеты",
+      "Цветы в коробке"
+    ],
+    "addons": [
+      {
+        "id": "card",
+        "name": "Открытка",
+        "price": 5,
+        "available": true
+      },
+      {
+        "id": "vase",
+        "name": "Стеклянная ваза",
+        "price": 25,
+        "available": true
+      }
+    ],
+    "demo": true,
+    "deliveryConfirmed": false
+  },
+  "coupon": {
+    "id": "WELCOME10",
+    "code": "WELCOME10",
+    "percent": 10,
+    "min": 100,
+    "expires": "2027-12-31",
+    "limit": 100,
+    "perUser": 1,
+    "active": true,
+    "demo": true
+  },
+  "user": {
+    "id": "demo-user",
+    "role": "customer",
+    "email": "user@flower.test",
+    "name": "Анна",
+    "phone": "",
+    "addresses": [],
+    "favorites": [
+      "p1",
+      "p3"
+    ],
+    "demo": true
+  },
+  "admin": {
+    "id": "demo-admin",
+    "role": "admin",
+    "email": "admin@flower.test",
+    "name": "Администратор",
+    "phone": "",
+    "addresses": [],
+    "favorites": [],
+    "demo": true
+  },
+  "orders": [
+    {
+      "id": "DEMO-1001",
+      "userId": "demo-user",
+      "created": "2026-10-09T12:00:00Z",
+      "buyer": {
+        "name": "Анна",
+        "phone": "+375 29 000 00 00",
+        "email": "user@flower.test"
+      },
+      "recipient": "Анна",
+      "recipientPhone": "+375 29 000 00 00",
+      "address": "Демонстрационный адрес",
+      "method": "delivery",
+      "zone": "Минск",
+      "date": "2026-10-10",
+      "interval": "13:00–16:00",
+      "card": "С любовью",
+      "comment": "Демонстрационный заказ",
+      "anonymous": false,
+      "currency": "BYN",
+      "items": [
+        {
+          "productId": "p1",
+          "name": "Тихое утро",
+          "image": "/images/hero.jpg",
+          "size": "M",
+          "composition": "11 роз, 5 эустом, эвкалипт",
+          "packaging": "Матовая бумага",
+          "price": 135,
+          "qty": 1,
+          "addons": [],
+          "lineTotal": 135
+        }
+      ],
+      "subtotal": 135,
+      "discount": 0,
+      "delivery": 12,
+      "total": 147,
+      "status": "Доставлен",
+      "payment": "Оплачен (демо)",
+      "demo": true
+    },
+    {
+      "id": "DEMO-1002",
+      "userId": "demo-user",
+      "created": "2026-10-09T12:00:00Z",
+      "buyer": {
+        "name": "Анна",
+        "phone": "+375 29 000 00 00",
+        "email": "user@flower.test"
+      },
+      "recipient": "Анна",
+      "recipientPhone": "+375 29 000 00 00",
+      "address": "Демонстрационный адрес",
+      "method": "delivery",
+      "zone": "Минск",
+      "date": "2026-10-10",
+      "interval": "13:00–16:00",
+      "card": "С любовью",
+      "comment": "Демонстрационный заказ",
+      "anonymous": false,
+      "currency": "BYN",
+      "items": [
+        {
+          "productId": "p2",
+          "name": "Розовый шёпот",
+          "image": "/images/rose-v2.webp",
+          "size": "M",
+          "composition": "15 роз",
+          "packaging": "Матовая бумага",
+          "price": 125,
+          "qty": 1,
+          "addons": [],
+          "lineTotal": 125
+        }
+      ],
+      "subtotal": 125,
+      "discount": 0,
+      "delivery": 12,
+      "total": 137,
+      "status": "Подтверждён",
+      "payment": "Не оплачен",
+      "demo": true
+    },
+    {
+      "id": "DEMO-1003",
+      "userId": "demo-user",
+      "created": "2026-10-09T12:00:00Z",
+      "buyer": {
+        "name": "Анна",
+        "phone": "+375 29 000 00 00",
+        "email": "user@flower.test"
+      },
+      "recipient": "Анна",
+      "recipientPhone": "+375 29 000 00 00",
+      "address": "Демонстрационный адрес",
+      "method": "delivery",
+      "zone": "Минск",
+      "date": "2026-10-10",
+      "interval": "13:00–16:00",
+      "card": "С любовью",
+      "comment": "Демонстрационный заказ",
+      "anonymous": false,
+      "currency": "BYN",
+      "items": [
+        {
+          "productId": "p3",
+          "name": "Солнечный день",
+          "image": "/images/tulip-v2.jpg",
+          "size": "M",
+          "composition": "19 тюльпанов",
+          "packaging": "Крафт",
+          "price": 105,
+          "qty": 1,
+          "addons": [],
+          "lineTotal": 105
+        }
+      ],
+      "subtotal": 105,
+      "discount": 0,
+      "delivery": 12,
+      "total": 117,
+      "status": "Собирается",
+      "payment": "Не оплачен",
+      "demo": true
+    }
+  ]
+}

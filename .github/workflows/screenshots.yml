@@ -1,0 +1,45 @@
+name: Скриншоты для README
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['docs/screenshots/**', 'README.md']
+  workflow_dispatch:
+    inputs:
+      site_url:
+        description: 'Адрес опубликованного магазина'
+        default: 'https://lepestok-flower-boutique.ambergull5.chatgpt.site'
+        required: true
+permissions:
+  contents: write
+concurrency:
+  group: screenshots-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install
+        working-directory: tools/screenshots
+      - run: npx playwright install --with-deps chromium
+        working-directory: tools/screenshots
+      - run: node capture.mjs
+        working-directory: tools/screenshots
+        env:
+          SITE_URL: ${{ inputs.site_url || 'https://lepestok-flower-boutique.ambergull5.chatgpt.site' }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lepestok-screenshots
+          path: docs/screenshots
+      - name: Добавить скриншоты в репозиторий
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add docs/screenshots README.md
+          git diff --staged --quiet && exit 0
+          git commit -m 'docs: обновить скриншоты интерфейса [skip ci]'
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"

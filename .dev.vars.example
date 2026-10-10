@@ -1,0 +1,2 @@
+DEMO_MODE=true
+# Real store: DEMO_MODE=false; ADMIN_EMAIL and ADMIN_PASSWORD via secrets.
