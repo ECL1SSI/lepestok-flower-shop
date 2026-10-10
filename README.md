@@ -20,7 +20,7 @@
 ## Скриншоты
 
 <!-- SCREENSHOTS:START -->
-<details>
+<details open>
 <summary>Главная</summary>
 
 ![Главная](docs/screenshots/home-desktop.png)
