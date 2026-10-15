@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 const dir=fs.mkdtempSync(path.join(os.tmpdir(),'flower-tests-'));
-for(const name of ['seed','server','catalog']){let code=fs.readFileSync('lib/'+name+'.ts','utf8').replace("from './seed'","from './seed.mjs'");fs.writeFileSync(path.join(dir,name+'.mjs'),ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText)}
+for(const name of ['seed','product','server','catalog']){let code=fs.readFileSync('lib/'+name+'.ts','utf8').replace(/from '\.\/(seed|product)'/g,"from './$1.mjs'");fs.writeFileSync(path.join(dir,name+'.mjs'),ts.transpileModule(code,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText)}
 const {handle,resetSeed}=await import(path.join(dir,'server.mjs'));
 const sqlite=new DatabaseSync(path.join(dir,'test.sqlite'));for(const migration of fs.readdirSync('drizzle').filter(x=>x.endsWith('.sql')).sort())sqlite.exec(fs.readFileSync('drizzle/'+migration,'utf8'));
 class Statement{constructor(sql,args=[]){this.sql=sql;this.args=args}bind(...args){return new Statement(this.sql,args)}async first(){return sqlite.prepare(this.sql).get(...this.args)||null}async all(){return {results:sqlite.prepare(this.sql).all(...this.args)}}async run(){const r=sqlite.prepare(this.sql).run(...this.args);return {meta:{changes:Number(r.changes)}}}}
@@ -18,7 +18,7 @@ check(filterProducts(products,{query:'ТИХОЕ',sort:'popular'})[0].id==='p1',
 check(filterProducts(products,{query:'эустом',sort:'popular'}).length===4,'Поиск по составу');
 check(filterProducts(products,{maxPrice:110,sort:'asc'}).map(p=>p.id).join(',')==='p3','Бюджет использует цену выбранного стандартного размера');
 check(filterProducts(products,{occasion:'Свидание',flower:'Розы',shade:'Розовый',inStock:true,sort:'popular'}).map(p=>p.id).join(',')==='p2','Совместные фильтры по поводу, цветам, оттенку и наличию');
-check(filterProducts(products,{inStock:true,sort:'asc'}).length===5,'Фильтр наличия');
+check(filterProducts(products,{inStock:true,sort:'asc'}).length===3,'Фильтр только готовых букетов в наличии');
 check(filterProducts(products,{query:'несуществующий букет',sort:'popular'}).length===0,'Пустое состояние поиска');
 check(filterProducts(products,{sort:'asc'})[0].id==='p3'&&filterProducts(products,{sort:'desc'})[0].id==='p6','Сортировка по цене в обе стороны');
 let r=await request('store');check(r.status===200&&r.data.products.length===6,'Демонстрационная витрина и 6 букетов');check(sqlite.prepare('SELECT COUNT(*) n FROM users').get().n===2,'Изначально ровно два аккаунта');check(sqlite.prepare('SELECT hash FROM users LIMIT 1').get().hash.length===64,'Пароли хешированы');
@@ -58,6 +58,25 @@ resetSeed();r=await request('store');check(!r.data.products.some(p=>p.id==='p1')
 let st=r.data.settings;r=await request('admin/settings','POST',{...st,name:'Тестовый бутик',delivery:19},'admin');check(r.status===200,'Настройки сохраняются');r=await request('store');check(r.data.settings.name==='Тестовый бутик'&&r.data.settings.delivery===19,'Настройки отражаются в магазине');
 r=await request('admin/coupons','POST',{code:'TEST20',percent:20,min:50,expires:'2027-12-31',limit:2,perUser:0,active:true},'admin');check(r.status===200,'Создание промокода');
 r=await request('admin/settings','POST',st,'admin',{'origin':'https://attacker.test'});check(r.status===403,'Межсайтовая запись запрещена');
+
+r=await request('inquiries','POST',{kind:'subscription',budget:150});check(r.status===400,'Заявка требует имени, телефона и согласия');
+const inquiry={kind:'subscription',name:'Анна',phone:'+375 29 000 00 00',budget:150,frequency:'Раз в неделю',wishes:'Сезонные цветы',consent:true};
+r=await request('inquiries','POST',inquiry);check(r.status===201&&r.data.status==='Новая'&&!('phone' in r.data),'Гостевая заявка сохраняется без раскрытия контактов в ответе');const reqid=r.data.id;
+r=await request('admin/data','GET',undefined,'admin');check(r.data.inquiries.some(a=>a.id===reqid&&a.phone===inquiry.phone),'Администратор видит сохранённую заявку и контакты');
+r=await request('admin/inquiries/'+reqid,'PATCH',{status:'Связались'},'user');check(r.status===403,'Покупатель не может изменять заявки');
+r=await request('admin/inquiries/'+reqid,'PATCH',{status:'Связались'},'admin');check(r.status===200&&r.data.status==='Связались','Статус заявки меняется администратором');
+r=await request('admin/inquiries/settings','PATCH',{status:'Закрыта'},'admin');check(r.status===404,'Заявкой нельзя перезаписать настройки магазина');
+r=await request('inquiries','GET');check(r.status===404,'Публичный API не раскрывает заявки и контакты');
+r=await request('inquiries','POST',{...inquiry,kind:'certificate',budget:200});check(r.status===201,'Заявка на сертификат сохраняется без выпуска и оплаты');
+r=await request('inquiries','POST',{...inquiry,kind:'custom',budget:125});check(r.status===201,'Индивидуальный букет сохраняется в серверной базе');
+r=await request('inquiries','POST',{...inquiry,kind:'subscription',frequency:'каждую секунду'});check(r.status===400,'Частота подписки проверяется на сервере');
+r=await request('inquiries','POST',{...inquiry,consent:'true'});check(r.status===400,'Согласие должно быть явным boolean');
+resetSeed();r=await request('admin/data','GET',undefined,'admin');check(r.data.inquiries.find(a=>a.id===reqid).status==='Связались','Заявки и статусы сохраняются после перезапуска');
+check(sqlite.prepare('SELECT COUNT(*) n FROM users').get().n===3,'Перезапуск не создаёт повторные демо-аккаунты');
+const existing=r.data.products.find(p=>p.id===pid);r=await request('admin/products','POST',{...existing,availability:'Под заказ',available:true},'admin');check(r.data.availability==='Под заказ'&&r.data.available,'Статус «Под заказ» сохраняется без блокировки согласования');
+r=await request('admin/products','POST',{...existing,availability:'Нет в наличии',available:true},'admin');check(r.data.available===false,'Сервер согласует флаг доступности со статусом');
+r=await request('quote','POST',{items:[{productId:pid,size:'M',qty:1,packaging:existing.packaging[0],addons:[]}],method:'pickup'});check(r.status===400,'Недоступный букет нельзя купить даже при подмене клиента');
+
 await request('auth/logout','POST',undefined,'user');r=await request('profile','GET',undefined,'user');check(r.status===401,'Выход покупателя аннулирует сессию');
 await request('auth/logout','POST',undefined,'admin');r=await request('admin/data','GET',undefined,'admin');check(r.status===401,'Выход администратора аннулирует сессию');
 env.DEMO_MODE='false';r=await request('auth/login','POST',{email:'admin@flower.test',password:'AdminDemo!2026'},'admin');check(r.status===401,'Демо-аккаунты отключаются в рабочей среде');

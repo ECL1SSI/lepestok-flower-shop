@@ -12,3 +12,7 @@ dist/
 next-env.d.ts
 .DS_Store
 *.log
+
+dist-demo
+playwright-report
+test-results
