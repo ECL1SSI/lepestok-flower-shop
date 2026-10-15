@@ -79,9 +79,16 @@ Workflow **«Учебная демонстрация — GitHub Pages»** уже
 </details>
 
 <details>
-<summary>Вход</summary>
+<summary>Учебный вход</summary>
 
-![Вход](docs/screenshots/login.png)
+![Учебный вход](docs/screenshots/login.png)
+
+</details>
+
+<details>
+<summary>Кабинет покупателя</summary>
+
+![Кабинет покупателя](docs/screenshots/account.png)
 
 </details>
 
@@ -89,6 +96,13 @@ Workflow **«Учебная демонстрация — GitHub Pages»** уже
 <summary>Панель администратора</summary>
 
 ![Панель администратора](docs/screenshots/admin.png)
+
+</details>
+
+<details>
+<summary>Подписка</summary>
+
+![Подписка](docs/screenshots/subscription.png)
 
 </details>
 
