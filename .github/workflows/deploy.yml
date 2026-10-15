@@ -37,5 +37,5 @@ jobs:
       - run: pnpm test
       - run: pnpm db:migrate:remote
       - run: pnpm build
-      - run: pnpm deploy
+      - run: pnpm run deploy
       - run: node scripts/upload-admin-secrets.mjs
